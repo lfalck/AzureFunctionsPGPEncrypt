@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using Kurukuru;
+using System.Text;
 
 namespace PGPEncryptConsoleApp
 {
@@ -15,7 +16,9 @@ namespace PGPEncryptConsoleApp
                 
                 string tempPath = Path.Combine(Path.GetTempPath(), "pgpcore");
                 string publicKeyFilePath = Path.Combine(tempPath, "public.asc");
+                string publicKeyBase64FilePath = Path.Combine(tempPath, "public_base64.asc");
                 string privateKeyFilePath = Path.Combine(tempPath, "private.asc");
+                string privateKeyBase64FilePath = Path.Combine(tempPath, "private_base64.asc");
                 string contentFilePath = Path.Combine(tempPath, "content.txt");
                 string encryptedFilePath = Path.Combine(tempPath, "content_encrypted.pgp");
                 string decryptedFilePath = Path.Combine(tempPath, "content_decrypted.txt");
@@ -35,8 +38,16 @@ namespace PGPEncryptConsoleApp
                 {
                     pgp.GenerateKey(publicKeyFilePath, privateKeyFilePath, username, password, strength, certainty);
                 });
+                string publicKey = File.ReadAllText(publicKeyFilePath);
+                File.WriteAllText(publicKeyBase64FilePath, Convert.ToBase64String(Encoding.UTF8.GetBytes(publicKey)));
                 Console.WriteLine($"Created public key: {publicKeyFilePath}");
+                Console.WriteLine($"Converted public key to base64: {publicKeyBase64FilePath}");
+
                 Console.WriteLine($"Created private key: {privateKeyFilePath}");
+                string privateKey = File.ReadAllText(privateKeyFilePath);
+                File.WriteAllText(privateKeyBase64FilePath, Convert.ToBase64String(Encoding.UTF8.GetBytes(privateKey)));
+                Console.WriteLine($"Created private key: {privateKeyFilePath}");
+                Console.WriteLine($"Converted private key to base64: {privateKeyBase64FilePath}");
 
                 // Encrypt file
                 pgp.EncryptFile(contentFilePath, encryptedFilePath, publicKeyFilePath, true, true);
