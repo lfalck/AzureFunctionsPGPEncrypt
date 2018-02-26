@@ -45,6 +45,9 @@ namespace PGPEncryptConsoleApp
                 // Decrypt file
                 pgp.DecryptFile(encryptedFilePath, decryptedFilePath, privateKeyFilePath, password);
                 Console.WriteLine($"Decrypted test file: {decryptedFilePath}");
+
+                Console.WriteLine("Press any key to exit");
+                Console.ReadLine();
             }
         }
     }
