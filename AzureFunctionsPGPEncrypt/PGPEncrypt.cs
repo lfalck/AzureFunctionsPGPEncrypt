@@ -13,6 +13,7 @@ using Microsoft.Azure.KeyVault;
 using System;
 using System.Text;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Http.Internal;
 
 namespace AzureFunctionsPGPEncrypt
 {
@@ -28,27 +29,38 @@ namespace AzureFunctionsPGPEncrypt
         {
             log.Info($"C# HTTP trigger function {nameof(PGPEncrypt)} processed a request.");
 
-            string publicKeySecretId = req.Query["publickeysecretid"];
+            string publicKeyBase64 = req.Query["public-key"];
+            string publicKeyEnvironmentVariable = req.Query["public-key-environment-variable"];
+            string publicKeySecretId = req.Query["public-key-secret-id"];
 
-            if (publicKeySecretId == null)
+            if (publicKeyBase64 == null && publicKeyEnvironmentVariable == null && publicKeySecretId == null)
             {
-                return new BadRequestObjectResult("Please pass a public key secret identifier on the query string");
-            }
-
-            string publicKey;
-            try
-            {
-                publicKey = await GetPublicKeyAsync(publicKeySecretId);
-            }
-            catch (KeyVaultErrorException e) when (e.Body.Error.Code == "SecretNotFound")
-            {
-                return new NotFoundResult();
-            }
-            catch (KeyVaultErrorException e) when (e.Body.Error.Code == "Forbidden")
-            {
-                return new UnauthorizedResult();
+                return new BadRequestObjectResult("Please pass a base64 encoded public key, an environment variable name, or a key vault secret identifier on the query string");
             }
 
+            if (publicKeyBase64 == null && publicKeyEnvironmentVariable != null)
+            {
+                publicKeyBase64 = Environment.GetEnvironmentVariable(publicKeyEnvironmentVariable);
+            }
+
+            if (publicKeyBase64 == null && publicKeySecretId != null)
+            {
+                try
+                {
+                    publicKeyBase64 = await GetPublicKeyAsync(publicKeySecretId);
+                }
+                catch (KeyVaultErrorException e) when (e.Body.Error.Code == "SecretNotFound")
+                {
+                    return new NotFoundResult();
+                }
+                catch (KeyVaultErrorException e) when (e.Body.Error.Code == "Forbidden")
+                {
+                    return new UnauthorizedResult();
+                }
+            }
+            byte[] data = Convert.FromBase64String(publicKeyBase64);
+            string publicKey = Encoding.UTF8.GetString(data);
+            req.EnableRewind(); //Make RequestBody Stream seekable
             Stream encryptedData = await EncryptAsync(req.Body, publicKey);
 
             return new OkObjectResult(encryptedData);
@@ -63,8 +75,7 @@ namespace AzureFunctionsPGPEncrypt
                 var kvClient = new KeyVaultClient(authenticationCallback, client);
 
                 SecretBundle secretBundle = await kvClient.GetSecretAsync(secretIdentifier);
-                byte[] data = Convert.FromBase64String(secretBundle.Value);
-                secrects[secretIdentifier] = Encoding.UTF8.GetString(data);
+                secrects[secretIdentifier] = secretBundle.Value;
             }
             return secrects[secretIdentifier];
         }
@@ -95,5 +106,4 @@ namespace AzureFunctionsPGPEncrypt
             return stream;
         }
     }
-
 }
