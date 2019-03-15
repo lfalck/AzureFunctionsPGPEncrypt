@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs.Host;
 using PgpCore;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault.Models;
@@ -14,6 +13,7 @@ using System;
 using System.Text;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace AzureFunctionsPGPEncrypt
 {
@@ -25,9 +25,9 @@ namespace AzureFunctionsPGPEncrypt
         [FunctionName(nameof(PGPEncrypt))]
         public static async Task<IActionResult> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
-        HttpRequest req, TraceWriter log)
+        HttpRequest req, ILogger log)
         {
-            log.Info($"C# HTTP trigger function {nameof(PGPEncrypt)} processed a request.");
+            log.LogInformation($"C# HTTP trigger function {nameof(PGPEncrypt)} processed a request.");
 
             string publicKeyBase64 = req.Query["public-key"];
             string publicKeyEnvironmentVariable = req.Query["public-key-environment-variable"];
