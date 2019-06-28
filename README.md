@@ -14,5 +14,9 @@ Azure function which performs PGP encryption using [PgpCore](https://github.com/
 * Add an Access Policy in Key Vault which gives Get permissions for Secrets to your Function App Principal
 * Add a Base64 encoded public key as an Azure Key Vault Secret
 
+## Key generation
+Option 1: Use a program such as [GPG](https://gnupg.org/) or [GPW4Win](https://www.gpg4win.org/).  
+Option 2: Use the console app **PGPEncryptConsoleApp** in the repo
+
 # Caching
 To increase performance the function does some simple caching to avoid fetching from Azure Key Vault on each invocation if that option is used. The Key Vault Secret Identifier is used as a key in the cache, which means that if you include the secret version in the identifier new versions will always be fetched from Key Vault.
