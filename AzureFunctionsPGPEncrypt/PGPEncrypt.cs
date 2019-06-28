@@ -19,8 +19,8 @@ namespace AzureFunctionsPGPEncrypt
 {
     public static class PGPEncrypt
     {
-        private static HttpClient client = new HttpClient();
-        private static ConcurrentDictionary<string, string> secrects = new ConcurrentDictionary<string, string>();
+        private static readonly HttpClient client = new HttpClient();
+        private static ConcurrentDictionary<string, string> secrets = new ConcurrentDictionary<string, string>();
 
         [FunctionName(nameof(PGPEncrypt))]
         public static async Task<IActionResult> RunAsync(
@@ -68,16 +68,16 @@ namespace AzureFunctionsPGPEncrypt
 
         private static async Task<string> GetPublicKeyAsync(string secretIdentifier)
         {
-            if (!secrects.ContainsKey(secretIdentifier))
+            if (!secrets.ContainsKey(secretIdentifier))
             {
                 var azureServiceTokenProvider = new AzureServiceTokenProvider();
                 var authenticationCallback = new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback);
                 var kvClient = new KeyVaultClient(authenticationCallback, client);
 
                 SecretBundle secretBundle = await kvClient.GetSecretAsync(secretIdentifier);
-                secrects[secretIdentifier] = secretBundle.Value;
+                secrets[secretIdentifier] = secretBundle.Value;
             }
-            return secrects[secretIdentifier];
+            return secrets[secretIdentifier];
         }
 
         private static async Task<Stream> EncryptAsync(Stream inputStream, string publicKey)
