@@ -13,7 +13,7 @@ namespace PGPEncryptConsoleApp
             using (PGP pgp = new PGP())
             {
                 Console.WriteLine($"Welcome to PGPEncryptConsoleApp!");
-                
+
                 string tempPath = Path.Combine(Path.GetTempPath(), "pgpcore");
                 string publicKeyFilePath = Path.Combine(tempPath, "public.asc");
                 string publicKeyBase64FilePath = Path.Combine(tempPath, "public_base64.asc");
@@ -23,7 +23,6 @@ namespace PGPEncryptConsoleApp
                 string encryptedFilePath = Path.Combine(tempPath, "content_encrypted.pgp");
                 string decryptedFilePath = Path.Combine(tempPath, "content_decrypted.txt");
                 string username = null;
-                string password = null;
                 int strength = 4096;
                 int certainty = 8;
 
@@ -32,6 +31,10 @@ namespace PGPEncryptConsoleApp
                 Console.WriteLine($"Created temp directory: {tempPath}");
                 File.WriteAllText(contentFilePath, "Hello World PGPCore!");
                 Console.WriteLine($"Created test file: {contentFilePath}");
+
+                // Create a password
+                Console.WriteLine($"Enter a password or press enter to not use a password");
+                string password = ReadLine.ReadPassword();
 
                 // Generate keys
                 Spinner.Start("Generating keys...", () =>
