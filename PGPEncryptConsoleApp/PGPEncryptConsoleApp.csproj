@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Kurukuru" Version="1.1.0" />
-    <PackageReference Include="PgpCore" Version="1.4.1" />
+    <PackageReference Include="PgpCore" Version="1.7.0" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
   </ItemGroup>
 
