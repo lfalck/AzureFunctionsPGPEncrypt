@@ -1,7 +1,7 @@
 [![license](https://img.shields.io/github/license/lfalck/AzureFunctionsPGPEncrypt.svg)]()
 # AzureFunctionsPGPEncrypt
 
-Azure function which performs PGP encryption using [PgpCore](https://github.com/mattosaurus/PgpCore). The public key can be stored in an environment variable, or in Azure Key Vault and accessed using [Key Vault references](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references).
+Azure function which performs PGP encryption using [PgpCore](https://github.com/mattosaurus/PgpCore). The public key can be stored in an environment variable or in Azure Key Vault by using [Key Vault references](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references).
 
 # Get started
 * Make a request to the function with the unencrypted data in the body
