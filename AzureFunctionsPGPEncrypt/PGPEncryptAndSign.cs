@@ -58,7 +58,7 @@ public class PGPEncryptAndSign
         }
     }
 
-    private static async Task<Stream> EncryptAndSignAsync(Stream inputStream, string publicKey, string privateKey, string passPhrase)
+    private async Task<Stream> EncryptAndSignAsync(Stream inputStream, string publicKey, string privateKey, string passPhrase)
     {
         using (PGP pgp = new PGP(new EncryptionKeys(publicKey, privateKey, passPhrase)))
         {

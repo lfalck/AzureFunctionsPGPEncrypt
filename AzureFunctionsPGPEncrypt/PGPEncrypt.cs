@@ -49,7 +49,7 @@ public class PGPEncrypt
         }
     }
 
-    private static async Task<Stream> EncryptAsync(Stream inputStream, string publicKey)
+    private async Task<Stream> EncryptAsync(Stream inputStream, string publicKey)
     {
         using (PGP pgp = new PGP(new EncryptionKeys(publicKey))) 
         {
