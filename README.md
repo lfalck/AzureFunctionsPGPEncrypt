@@ -1,7 +1,7 @@
 [![license](https://img.shields.io/github/license/lfalck/AzureFunctionsPGPEncrypt.svg)]()
 # AzureFunctionsPGPEncrypt
 
-Azure function which performs PGP encryption and decryption using [PgpCore](https://github.com/mattosaurus/PgpCore). The private and public keys can be stored in environment variables or in Azure Key Vault by using [Key Vault references](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references).
+.NET 8 Azure Function which performs PGP encryption and decryption using [PgpCore](https://github.com/mattosaurus/PgpCore). The private and public keys can be stored in environment variables or in Azure Key Vault by using [Key Vault references](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references).
 
 ## Encrypt
 * Use the function PGPEncrypt.
