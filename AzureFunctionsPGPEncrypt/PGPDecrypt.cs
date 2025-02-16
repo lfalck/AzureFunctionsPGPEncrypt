@@ -36,9 +36,13 @@ public class PGPDecrypt
         byte[] privateKeyBytes = Convert.FromBase64String(privateKeyBase64);
         string privateKey = Encoding.UTF8.GetString(privateKeyBytes);
 
+        var inputStream = new MemoryStream();
+        await req.Body.CopyToAsync(inputStream);
+        inputStream.Seek(0, SeekOrigin.Begin);
+
         try
         {
-            var decryptedData = await DecryptAsync(req.Body, privateKey, passPhrase);
+            Stream decryptedData = await DecryptAsync(inputStream, privateKey, passPhrase);
             return new OkObjectResult(decryptedData);
         }
         catch (PgpException pgpException)

@@ -36,11 +36,13 @@ public class PGPEncrypt
         byte[] publicKeyBytes = Convert.FromBase64String(publicKeyBase64);
         string publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
-        req.EnableBuffering(); //Make RequestBody Stream seekable
+        var inputStream = new MemoryStream();
+        await req.Body.CopyToAsync(inputStream);
+        inputStream.Seek(0, SeekOrigin.Begin);
 
         try
         {
-            Stream encryptedData = await EncryptAsync(req.Body, publicKey);
+            Stream encryptedData = await EncryptAsync(inputStream, publicKey);
             return new OkObjectResult(encryptedData);
         }
         catch (PgpException pgpException)

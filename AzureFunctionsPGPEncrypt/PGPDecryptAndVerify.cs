@@ -17,6 +17,7 @@ namespace AzureFunctionsPGPEncrypt
         public PGPDecryptAndVerify(ILogger<PGPDecryptAndVerify> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [Function(nameof(PGPDecryptAndVerify))]
@@ -44,9 +45,13 @@ namespace AzureFunctionsPGPEncrypt
             byte[] publicKeyVerifyBytes = Convert.FromBase64String(publicKeyVerifyBase64);
             string publicKeyVerify = Encoding.UTF8.GetString(publicKeyVerifyBytes);
 
+            var inputStream = new MemoryStream();
+            await req.Body.CopyToAsync(inputStream);
+            inputStream.Seek(0, SeekOrigin.Begin);
+
             try
             {
-                Stream decryptedData = await DecryptAndVerifyAsync(req.Body, privateKey, publicKeyVerify, passPhrase);
+                Stream decryptedData = await DecryptAndVerifyAsync(inputStream, privateKey, publicKeyVerify, passPhrase);
                 return new OkObjectResult(decryptedData);
             }
             catch (PgpException pgpException)

@@ -45,11 +45,13 @@ public class PGPEncryptAndSign
         byte[] privateKeySignBytes = Convert.FromBase64String(privateKeySignBase64);
         string privateKeySign = Encoding.UTF8.GetString(privateKeySignBytes);
 
-        req.EnableBuffering(); //Make RequestBody Stream seekable
+        var inputStream = new MemoryStream();
+        await req.Body.CopyToAsync(inputStream);
+        inputStream.Seek(0, SeekOrigin.Begin);
 
         try
         {
-            Stream encryptedData = await EncryptAndSignAsync(req.Body, publicKey, privateKeySign, passPhraseSign);
+            Stream encryptedData = await EncryptAndSignAsync(inputStream, publicKey, privateKeySign, passPhraseSign);
             return new OkObjectResult(encryptedData);
         }
         catch (PgpException pgpException)
