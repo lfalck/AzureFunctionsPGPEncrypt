@@ -1,60 +1,67 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using PgpCore;
 using Org.BouncyCastle.Bcpg.OpenPgp;
+using Microsoft.Extensions.Configuration;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace AzureFunctionsPGPEncrypt
+namespace AzureFunctionsPGPEncrypt;
+
+public class PGPEncrypt
 {
-    public static class PGPEncrypt
+    private readonly ILogger<PGPEncrypt> _logger;
+    private readonly IConfiguration _configuration;
+
+    public PGPEncrypt(ILogger<PGPEncrypt> logger, IConfiguration configuration)
     {
-        [FunctionName(nameof(PGPEncrypt))]
-        public static async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req, ILogger log)
+        _logger = logger;
+        _configuration = configuration;
+    }
+
+    [Function(nameof(PGPEncrypt))]
+    public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        _logger.LogInformation($"C# HTTP trigger function {nameof(PGPEncrypt)} processed a request.");
+
+        string publicKeyBase64 = _configuration["pgp-public-key"];
+
+        if (string.IsNullOrEmpty(publicKeyBase64))
         {
-            log.LogInformation($"C# HTTP trigger function {nameof(PGPEncrypt)} processed a request.");
-
-            string publicKeyBase64 = Environment.GetEnvironmentVariable("pgp-public-key");
-
-            if (string.IsNullOrEmpty(publicKeyBase64))
-            {
-                return new BadRequestObjectResult($"Please add a base64 encoded public key to an environment variable called pgp-public-key");
-            }
-
-            byte[] publicKeyBytes = Convert.FromBase64String(publicKeyBase64);
-            string publicKey = Encoding.UTF8.GetString(publicKeyBytes);
-
-            req.EnableBuffering(); //Make RequestBody Stream seekable
-
-            try
-            {
-                Stream encryptedData = await EncryptAsync(req.Body, publicKey);
-                return new OkObjectResult(encryptedData);
-            }
-            catch (PgpException pgpException)
-            {
-                return new BadRequestObjectResult(pgpException.Message);
-            }
+            return new BadRequestObjectResult($"Please add a base64 encoded public key to an environment variable called pgp-public-key");
         }
 
-        private static async Task<Stream> EncryptAsync(Stream inputStream, string publicKey)
-        {
-            using (PGP pgp = new PGP())
-            {
-                Stream outputStream = new MemoryStream();
+        byte[] publicKeyBytes = Convert.FromBase64String(publicKeyBase64);
+        string publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
-                using (inputStream)
-                using (Stream publicKeyStream = publicKey.ToStream())
-                {
-                    await pgp.EncryptStreamAsync(inputStream, outputStream, publicKeyStream, true, true);
-                    outputStream.Seek(0, SeekOrigin.Begin);
-                    return outputStream;
-                }
+        var inputStream = new MemoryStream();
+        await req.Body.CopyToAsync(inputStream);
+        inputStream.Seek(0, SeekOrigin.Begin);
+
+        try
+        {
+            Stream encryptedData = await EncryptAsync(inputStream, publicKey);
+            return new OkObjectResult(encryptedData);
+        }
+        catch (PgpException pgpException)
+        {
+            return new BadRequestObjectResult(pgpException.Message);
+        }
+    }
+
+    private async Task<Stream> EncryptAsync(Stream inputStream, string publicKey)
+    {
+        using (PGP pgp = new PGP(new EncryptionKeys(publicKey))) 
+        {
+            var outputStream = new MemoryStream();
+
+            using (inputStream)
+            {
+                await pgp.EncryptStreamAsync(inputStream, outputStream, true, true);
+                outputStream.Seek(0, SeekOrigin.Begin);
+                return outputStream;
             }
         }
     }

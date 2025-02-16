@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctionsPGPEncrypt", "AzureFunctionsPGPEncrypt\AzureFunctionsPGPEncrypt.csproj", "{81969460-5F38-44F6-B137-6E5B29824C7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGPEncryptConsoleApp", "PGPEncryptConsoleApp\PGPEncryptConsoleApp.csproj", "{FB401D65-F0B6-4DB1-8EA4-C936F88F80B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PGPEncryptConsoleApp", "PGPEncryptConsoleApp\PGPEncryptConsoleApp.csproj", "{FB401D65-F0B6-4DB1-8EA4-C936F88F80B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC3D61DD-0A17-481C-97B6-2A719F3740C8}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
